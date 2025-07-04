@@ -1,0 +1,28 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(9, 3rem);
+  grid-template-rows: repeat(9, 3rem);
+  
+  .cell {
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    font-weight: bold;
+    user-select: none;
+    cursor: pointer;
+  }
+}
+
+button{
+    font-family: var(--font-family);
+}
+select{
+    font-family: var(--font-family);
+}
+
+                  .teste{
+                    color: #4c7cffb4}
+

@@ -1,0 +1,11 @@
+body {
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-color);
+
+  --background-color: #121212;
+  --header-background-color: #121212;
+  --text-color: #fff;
+  --text-hover: rgba(255, 255, 255, 0.6);
+  --font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+}
