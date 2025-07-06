@@ -1,0 +1,19 @@
+.header {
+  width: 100%;
+  min-height: 2.5rem;
+  background-color: var(--header-background-color);
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+
+  h1 {
+    margin: 0;
+    margin-left: 1rem;
+    flex: 1;
+    color: var(--text-color);
+    font-size: large;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
