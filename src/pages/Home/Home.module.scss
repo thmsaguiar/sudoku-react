@@ -1,7 +1,6 @@
 .content {
   display: flex;
   justify-content: center;
-  height: calc(100vh - 140px); // altura menos header
   background-color: #121212;
   padding: 1rem; // para dar espaçamento em telas pequenas
 }
@@ -55,6 +54,29 @@ select:hover {
   background-color: #555;
 }
 
+/* Overlay do botão play */
+.pauseOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(18, 18, 18, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.playButton {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 5rem;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+
 /* Responsividade */
 
 @media (max-width: 767px) {
@@ -87,6 +109,10 @@ select:hover {
 }
 
 @media (min-width: 768px) {
+  .content {
+    height: calc(100vh - 140px); // altura menos header
+  }
+
   .container {
     flex-direction: row;
     align-items: flex-start;
@@ -113,29 +139,6 @@ select:hover {
     font-size: 1rem;
     padding: 0.5rem 1rem;
   }
-}
-
-/* Overlay do botão play */
-.pauseOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: rgba(18, 18, 18, 0.85);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.playButton {
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 5rem;
-  cursor: pointer;
-  user-select: none;
-  outline: none;
 }
 
 @media (max-width: 400px) {
