@@ -223,6 +223,7 @@ export default function Home() {
 
   // Limpar células não fixas
   function clearAll() {
+    console.log("entrou");
     setGameState((prev) => {
       const newPuzzle = prev.puzzle.map((cell, idx) =>
         prev.fixedCells[idx] ? cell : null
@@ -413,7 +414,7 @@ export default function Home() {
 
           <button
             onClick={clearAll}
-            disabled={!isPaused}
+            disabled={isPaused}
             style={{
               opacity: isPaused ? 0.4 : 1,
               cursor: isPaused ? "not-allowed" : "pointer",
@@ -423,7 +424,7 @@ export default function Home() {
           </button>
           <button
             onClick={handleErase}
-            disabled={!isPaused}
+            disabled={isPaused}
             style={{
               opacity: isPaused ? 0.4 : 1,
               cursor: isPaused ? "not-allowed" : "pointer",
