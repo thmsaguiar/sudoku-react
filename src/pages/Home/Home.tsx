@@ -295,6 +295,7 @@ export default function Home() {
   const handleRestart = () => {
     generatePuzzle(difficulty);
     setShowGameOver(false);
+    setShowVictory(false);
 
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
