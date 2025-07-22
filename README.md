@@ -1,69 +1,41 @@
-# React + TypeScript + Vite
+# 🧩 Sudoku
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Netlify Status](https://api.netlify.com/api/v1/badges/a363ca3d-c2b7-44b4-8ce1-2223deb91d0e/deploy-status)]([https://app.netlify.com/projects/sudoku-reactapp/deploys]) ![GitHub last commit](https://img.shields.io/github/last-commit/thmsaguiar/sudoku-react)
 
-Currently, two official plugins are available:
+Um jogo de Sudoku feito com React + Vite, sem anúncios, totalmente gratuito, criado por paixão.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 💡 Por quê?
+Sempre adorei resolver sudokus, mas estava cansado de entrar em sites e ter que assistir a anúncios para jogar algo tão simples. Então pensei: por que não criar o meu próprio sudoku? 😄
+O resultado é esse projetinho feito do zero com bastante carinho e uma UI limpa, leve e sem distrações.
 
-## Expanding the ESLint configuration
+## ✨ Funcionalidades
+- Três níveis de dificuldade: Fácil, Médio e Difícil
+- Sistema de vidas (3 chances)
+- Verificação de acertos e erros em tempo real
+- Pausar e retomar o jogo
+- Temporizador integrado
+- Animações leves com Material UI (MUI)
+- Diálogos de Game Over / Vitória
+- Sem anúncios, sem frescura 💜
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Tecnologias usadas
+- React 19
+- Vite para build e desenvolvimento rápido
+- Material UI (MUI) para componentes estilizados (diálogos, ícones)
+- sudoku (lib para geração e solução de puzzles)
+- TypeScript para segurança de tipos
+- CSS Modules + SCSS para estilização
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🖥️ Instalação e uso local
 ```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+git clone https://github.com/thmsaguiar/sudoku-react
+cd sudoku-react
+npm install
+npm run dev
 ```
+Abra o navegador em http://localhost:5173.
+
+## Criador
+
+| [<img src="https://github.com/thmsaguiar.png?size=115" width=115><br><sub>@thmsaguiar</sub>](https://github.com/thmsaguiar) |
+| :---: |
