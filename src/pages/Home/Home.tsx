@@ -32,7 +32,7 @@ export default function Home() {
   const [isPaused, setIsPaused] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Gera o puzzle
   function generatePuzzle(difficulty: Difficulty) {
@@ -128,7 +128,14 @@ export default function Home() {
   // Atualiza puzzle após input numérico
   function handleNumberInput(value: number) {
     setGameState((prev) => {
-      const { selectedIndex, fixedCells, puzzle, solution, correctCounts, lives } = prev;
+      const {
+        selectedIndex,
+        fixedCells,
+        puzzle,
+        solution,
+        correctCounts,
+        lives,
+      } = prev;
       if (selectedIndex === null) return prev;
       if (fixedCells[selectedIndex]) return prev;
 
@@ -247,7 +254,10 @@ export default function Home() {
   function formatTime(seconds: number) {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(
+      2,
+      "0"
+    )}`;
   }
 
   // Alternar pausa
@@ -270,68 +280,74 @@ export default function Home() {
             <option value="hard">Difícil</option>
           </select>
         </div>
-        <div style={{ position: "relative", width: "27rem", height: "27rem" }}>
-          <div className={styles.grid}>
-            {gameState.puzzle.map((cell, index) => {
-              const row = Math.floor(index / 9);
-              const col = index % 9;
-              const displayNumber = cell !== null ? cell + 1 : "";
-              const isHovered =
-                hoveredIndex !== null &&
-                (Math.floor(hoveredIndex / 9) === row ||
-                  hoveredIndex % 9 === col ||
-                  sameBlock(index, hoveredIndex));
-              const isFixed = gameState.fixedCells[index];
-              const isSelectedCell = gameState.selectedIndex === index;
-              const isSameNumberSelected =
-                gameState.selectedNumber !== null &&
-                cell === gameState.selectedNumber &&
-                index !== gameState.selectedIndex;
-              const isWrong =
-                !isFixed &&
-                cell !== null &&
-                gameState.solution.length > 0 &&
-                gameState.solution[index] !== cell;
+        <div>
+          <div style={{ position: "relative" }}>
+          <div style={{ alignSelf: "flex-start" }}>
+            <div className={styles.grid}>
+              {gameState.puzzle.map((cell, index) => {
+                const row = Math.floor(index / 9);
+                const col = index % 9;
+                const displayNumber = cell !== null ? cell + 1 : "";
+                const isHovered =
+                  hoveredIndex !== null &&
+                  (Math.floor(hoveredIndex / 9) === row ||
+                    hoveredIndex % 9 === col ||
+                    sameBlock(index, hoveredIndex));
+                const isFixed = gameState.fixedCells[index];
+                const isSelectedCell = gameState.selectedIndex === index;
+                const isSameNumberSelected =
+                  gameState.selectedNumber !== null &&
+                  cell === gameState.selectedNumber &&
+                  index !== gameState.selectedIndex;
+                const isWrong =
+                  !isFixed &&
+                  cell !== null &&
+                  gameState.solution.length > 0 &&
+                  gameState.solution[index] !== cell;
 
-              return (
-                <div
-                  key={index}
-                  className={styles.cell}
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                  onClick={() => handleCellClick(index)}
-                  style={{
-                    borderTop: row % 3 === 0 ? "2px solid gray" : "1px solid gray",
-                    borderLeft: col % 3 === 0 ? "2px solid gray" : "1px solid gray",
-                    borderRight: col === 8 ? "2px solid gray" : "",
-                    borderBottom: row === 8 ? "2px solid gray" : "",
-                    color: isWrong ? "#441111" : "white",
-                    backgroundColor: isSelectedCell
-                      ? "#4c7cffb4"
-                      : isWrong
-                      ? "#8d4f4f80"
-                      : isSameNumberSelected
-                      ? "#aabfff"
-                      : isHovered
-                      ? "#21212144"
-                      : isFixed
-                      ? "#1a1a1a"
-                      : "#212121",
-                    cursor: isFixed ? "default" : "pointer",
-                  }}
-                >
-                  {!isPaused ? displayNumber : ""}
-                </div>
-              );
-            })}
+                return (
+                  <div
+                    key={index}
+                    className={styles.cell}
+                    onMouseEnter={() => setHoveredIndex(index)}
+                    onMouseLeave={() => setHoveredIndex(null)}
+                    onClick={() => handleCellClick(index)}
+                    style={{
+                      borderTop:
+                        row % 3 === 0 ? "2px solid gray" : "1px solid gray",
+                      borderLeft:
+                        col % 3 === 0 ? "2px solid gray" : "1px solid gray",
+                      borderRight: col === 8 ? "2px solid gray" : "",
+                      borderBottom: row === 8 ? "2px solid gray" : "",
+                      color: isWrong ? "#441111" : "white",
+                      backgroundColor: isPaused
+                        ? "#212121"
+                        : isSelectedCell
+                        ? "#4c7cffb4"
+                        : isWrong
+                        ? "#8d4f4f80"
+                        : isSameNumberSelected
+                        ? "#aabfff"
+                        : isHovered
+                        ? "#21212144"
+                        : isFixed
+                        ? "#1a1a1a"
+                        : "#212121",
+                      cursor: isFixed ? "default" : "pointer",
+                    }}
+                  >
+                    {!isPaused ? displayNumber : ""}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-
           {isPaused && (
             <div className={styles.pauseOverlay} onClick={togglePause}>
               <button className={styles.playButton}>▶</button>
             </div>
           )}
-
+          </div>
           <div
             id="lifePoints"
             style={{ marginTop: "1rem", fontSize: "1.5rem" }}
@@ -354,9 +370,7 @@ export default function Home() {
             }}
           >
             Tempo: {formatTime(timeElapsed)}{" "}
-            <button onClick={togglePause}>
-              {isPaused ? "Retomar" : "Pausar"}
-            </button>
+            <button onClick={togglePause}>{isPaused ? "▶︎" : "||"}</button>
           </div>
 
           <button onClick={clearAll}>Limpar tudo</button>
@@ -379,7 +393,8 @@ export default function Home() {
                   padding: "0.5rem 1rem",
                   fontSize: "1rem",
                   opacity: gameState.correctCounts[i] >= 9 ? 0.4 : 1,
-                  cursor: gameState.correctCounts[i] >= 9 ? "not-allowed" : "pointer",
+                  cursor:
+                    gameState.correctCounts[i] >= 9 ? "not-allowed" : "pointer",
                 }}
               >
                 {i + 1}
