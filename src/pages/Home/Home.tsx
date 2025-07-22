@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./Home.module.scss";
 import sudoku from "sudoku";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import GameDialog from "../../components/GameDialog/GameDialog";
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -29,8 +30,10 @@ export default function Home() {
 
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(true);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [showGameOver, setShowGameOver] = useState(false);
+  const [showVictory, setShowVictory] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -78,6 +81,7 @@ export default function Home() {
     setTimeElapsed(0);
   }
 
+  // Dificuldade
   useEffect(() => {
     generatePuzzle(difficulty);
   }, [difficulty]);
@@ -127,64 +131,66 @@ export default function Home() {
 
   // Atualiza puzzle após input numérico
   function handleNumberInput(value: number) {
-    setGameState((prev) => {
-      const {
-        selectedIndex,
-        fixedCells,
-        puzzle,
-        solution,
-        correctCounts,
-        lives,
-      } = prev;
-      if (selectedIndex === null) return prev;
-      if (fixedCells[selectedIndex]) return prev;
+    if (gameState.lives > 0) {
+      setGameState((prev) => {
+        const {
+          selectedIndex,
+          fixedCells,
+          puzzle,
+          solution,
+          correctCounts,
+          lives,
+        } = prev;
+        if (selectedIndex === null) return prev;
+        if (fixedCells[selectedIndex]) return prev;
 
-      const newPuzzle = [...puzzle];
-      newPuzzle[selectedIndex] = value;
+        const newPuzzle = [...puzzle];
+        newPuzzle[selectedIndex] = value;
 
-      if (solution[selectedIndex] !== value) {
-        // Erro: perde vida
-        return {
-          ...prev,
-          puzzle: newPuzzle,
-          lives: lives - 1,
-          selectedNumber: value,
-        };
-      } else {
-        // Valor correto: limpa duplicatas na linha, coluna e bloco
-        const selectedRow = Math.floor(selectedIndex / 9);
-        const selectedCol = selectedIndex % 9;
+        if (solution[selectedIndex] !== value) {
+          // Erro: perde vida
+          return {
+            ...prev,
+            puzzle: newPuzzle,
+            lives: lives - 1,
+            selectedNumber: value,
+          };
+        } else {
+          // Valor correto: limpa duplicatas na linha, coluna e bloco
+          const selectedRow = Math.floor(selectedIndex / 9);
+          const selectedCol = selectedIndex % 9;
 
-        const updatedPuzzle = newPuzzle.map((cellValue, i) => {
-          const row = Math.floor(i / 9);
-          const col = i % 9;
-          const isSameRow = row === selectedRow;
-          const isSameCol = col === selectedCol;
-          const isSameBlock = sameBlock(i, selectedIndex);
+          const updatedPuzzle = newPuzzle.map((cellValue, i) => {
+            const row = Math.floor(i / 9);
+            const col = i % 9;
+            const isSameRow = row === selectedRow;
+            const isSameCol = col === selectedCol;
+            const isSameBlock = sameBlock(i, selectedIndex);
 
-          const shouldClear =
-            i !== selectedIndex &&
-            (isSameRow || isSameCol || isSameBlock) &&
-            cellValue === value &&
-            !fixedCells[i];
+            const shouldClear =
+              i !== selectedIndex &&
+              (isSameRow || isSameCol || isSameBlock) &&
+              cellValue === value &&
+              !fixedCells[i];
 
-          return shouldClear ? null : cellValue;
-        });
+            return shouldClear ? null : cellValue;
+          });
 
-        // Atualiza contagem correta
-        const newCorrectCounts = Array(9).fill(0);
-        updatedPuzzle.forEach((val, i) => {
-          if (val !== null && val === solution[i]) newCorrectCounts[val]++;
-        });
+          // Atualiza contagem correta
+          const newCorrectCounts = Array(9).fill(0);
+          updatedPuzzle.forEach((val, i) => {
+            if (val !== null && val === solution[i]) newCorrectCounts[val]++;
+          });
 
-        return {
-          ...prev,
-          puzzle: updatedPuzzle,
-          correctCounts: newCorrectCounts,
-          selectedNumber: value,
-        };
-      }
-    });
+          return {
+            ...prev,
+            puzzle: updatedPuzzle,
+            correctCounts: newCorrectCounts,
+            selectedNumber: value,
+          };
+        }
+      });
+    }
   }
 
   // Listener teclado para digitação e apagar
@@ -245,10 +251,30 @@ export default function Home() {
   // Verifica se o jogador perdeu todas vidas e reinicia
   useEffect(() => {
     if (gameState.lives <= 0) {
-      alert("Game Over!");
-      generatePuzzle(difficulty);
+      setShowGameOver(true);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     }
   }, [gameState.lives]);
+
+  // Vitória
+  useEffect(() => {
+    const allCorrect =
+      gameState.puzzle.length === 81 &&
+      gameState.puzzle.every(
+        (val, i) => val !== null && val === gameState.solution[i]
+      );
+
+    if (allCorrect) {
+      setShowVictory(true);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  }, [gameState.puzzle]);
 
   // Formatação do tempo
   function formatTime(seconds: number) {
@@ -264,6 +290,17 @@ export default function Home() {
   function togglePause() {
     setIsPaused((paused) => !paused);
   }
+
+  //Reiniciar jogo GameOver
+  const handleRestart = () => {
+    generatePuzzle(difficulty);
+    setShowGameOver(false);
+
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTimeElapsed((t) => t + 1);
+    }, 1000);
+  };
 
   return (
     <div className={styles.content}>
@@ -282,71 +319,71 @@ export default function Home() {
         </div>
         <div>
           <div style={{ position: "relative" }}>
-          <div style={{ alignSelf: "flex-start" }}>
-            <div className={styles.grid}>
-              {gameState.puzzle.map((cell, index) => {
-                const row = Math.floor(index / 9);
-                const col = index % 9;
-                const displayNumber = cell !== null ? cell + 1 : "";
-                const isHovered =
-                  hoveredIndex !== null &&
-                  (Math.floor(hoveredIndex / 9) === row ||
-                    hoveredIndex % 9 === col ||
-                    sameBlock(index, hoveredIndex));
-                const isFixed = gameState.fixedCells[index];
-                const isSelectedCell = gameState.selectedIndex === index;
-                const isSameNumberSelected =
-                  gameState.selectedNumber !== null &&
-                  cell === gameState.selectedNumber &&
-                  index !== gameState.selectedIndex;
-                const isWrong =
-                  !isFixed &&
-                  cell !== null &&
-                  gameState.solution.length > 0 &&
-                  gameState.solution[index] !== cell;
+            <div style={{ alignSelf: "flex-start" }}>
+              <div className={styles.grid}>
+                {gameState.puzzle.map((cell, index) => {
+                  const row = Math.floor(index / 9);
+                  const col = index % 9;
+                  const displayNumber = cell !== null ? cell + 1 : "";
+                  const isHovered =
+                    hoveredIndex !== null &&
+                    (Math.floor(hoveredIndex / 9) === row ||
+                      hoveredIndex % 9 === col ||
+                      sameBlock(index, hoveredIndex));
+                  const isFixed = gameState.fixedCells[index];
+                  const isSelectedCell = gameState.selectedIndex === index;
+                  const isSameNumberSelected =
+                    gameState.selectedNumber !== null &&
+                    cell === gameState.selectedNumber &&
+                    index !== gameState.selectedIndex;
+                  const isWrong =
+                    !isFixed &&
+                    cell !== null &&
+                    gameState.solution.length > 0 &&
+                    gameState.solution[index] !== cell;
 
-                return (
-                  <div
-                    key={index}
-                    className={styles.cell}
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                    onClick={() => handleCellClick(index)}
-                    style={{
-                      borderTop:
-                        row % 3 === 0 ? "2px solid gray" : "1px solid gray",
-                      borderLeft:
-                        col % 3 === 0 ? "2px solid gray" : "1px solid gray",
-                      borderRight: col === 8 ? "2px solid gray" : "",
-                      borderBottom: row === 8 ? "2px solid gray" : "",
-                      color: isWrong ? "#441111" : "white",
-                      backgroundColor: isPaused
-                        ? "#212121"
-                        : isSelectedCell
-                        ? "#4c7cffb4"
-                        : isWrong
-                        ? "#8d4f4f80"
-                        : isSameNumberSelected
-                        ? "#aabfff"
-                        : isHovered
-                        ? "#21212144"
-                        : isFixed
-                        ? "#1a1a1a"
-                        : "#212121",
-                      cursor: isFixed ? "default" : "pointer",
-                    }}
-                  >
-                    {!isPaused ? displayNumber : ""}
-                  </div>
-                );
-              })}
+                  return (
+                    <div
+                      key={index}
+                      className={styles.cell}
+                      onMouseEnter={() => setHoveredIndex(index)}
+                      onMouseLeave={() => setHoveredIndex(null)}
+                      onClick={() => handleCellClick(index)}
+                      style={{
+                        borderTop:
+                          row % 3 === 0 ? "3px solid gray" : "1px solid gray",
+                        borderLeft:
+                          col % 3 === 0 ? "3px solid gray" : "1px solid gray",
+                        borderRight: col === 8 ? "3px solid gray" : "",
+                        borderBottom: row === 8 ? "3px solid gray" : "",
+                        color: isWrong ? "#441111" : "white",
+                        backgroundColor: isPaused
+                          ? "#212121"
+                          : isSelectedCell
+                          ? "#4c7cffb4"
+                          : isWrong
+                          ? "#8d4f4f80"
+                          : isSameNumberSelected
+                          ? "#aabfff"
+                          : isHovered
+                          ? "#21212144"
+                          : isFixed
+                          ? "#1a1a1a"
+                          : "#212121",
+                        cursor: isFixed ? "default" : "pointer",
+                      }}
+                    >
+                      {!isPaused ? displayNumber : ""}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-          {isPaused && (
-            <div className={styles.pauseOverlay} onClick={togglePause}>
-              <button className={styles.playButton}>▶</button>
-            </div>
-          )}
+            {isPaused && (
+              <div className={styles.pauseOverlay} onClick={togglePause}>
+                <button className={styles.playButton}>▶</button>
+              </div>
+            )}
           </div>
           <div
             id="lifePoints"
@@ -373,8 +410,26 @@ export default function Home() {
             <button onClick={togglePause}>{isPaused ? "▶︎" : "||"}</button>
           </div>
 
-          <button onClick={clearAll}>Limpar tudo</button>
-          <button onClick={handleErase}>Apagar</button>
+          <button
+            onClick={clearAll}
+            disabled={!isPaused}
+            style={{
+              opacity: isPaused ? 0.4 : 1,
+              cursor: isPaused ? "not-allowed" : "pointer",
+            }}
+          >
+            Limpar tudo
+          </button>
+          <button
+            onClick={handleErase}
+            disabled={!isPaused}
+            style={{
+              opacity: isPaused ? 0.4 : 1,
+              cursor: isPaused ? "not-allowed" : "pointer",
+            }}
+          >
+            Apagar
+          </button>
 
           <div
             style={{
@@ -388,13 +443,16 @@ export default function Home() {
               <button
                 key={i}
                 onClick={() => handleNumberInput(i)}
-                disabled={gameState.correctCounts[i] >= 9}
+                disabled={gameState.correctCounts[i] >= 9 || isPaused}
                 style={{
                   padding: "0.5rem 1rem",
                   fontSize: "1rem",
-                  opacity: gameState.correctCounts[i] >= 9 ? 0.4 : 1,
+                  opacity:
+                    gameState.correctCounts[i] >= 9 || isPaused ? 0.4 : 1,
                   cursor:
-                    gameState.correctCounts[i] >= 9 ? "not-allowed" : "pointer",
+                    gameState.correctCounts[i] >= 9 || isPaused
+                      ? "not-allowed"
+                      : "pointer",
                 }}
               >
                 {i + 1}
@@ -403,6 +461,17 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <GameDialog
+        open={showGameOver || showVictory}
+        onRestart={handleRestart}
+        title={showGameOver ? "Game Over" : "Você conseguiu!!"}
+        subtitle={
+          showGameOver
+            ? "Você perdeu todas as vidas. Deseja reiniciar o jogo?"
+            : "Deseja começar um novo jogo?"
+        }
+        btnlabel={showGameOver ? "Reiniciar" : "Novo jogo"}
+      />
     </div>
   );
 }
